@@ -9,9 +9,9 @@ class KnowledgeBase(object):
     Contains things like a CFG, data references, etc.
     """
     def __init__(self, project, obj):
-        self._project = project
-        self.obj = obj
-        self._plugins = {}
+        object.__setattr__(self, '_project', project)
+        object.__setattr__(self, 'obj', obj)
+        object.__setattr__(self, '_plugins', {})
 
     @property
     def callgraph(self):
@@ -26,9 +26,9 @@ class KnowledgeBase(object):
         return self.indirect_jumps.resolved
 
     def __setstate__(self, state):
-        self._project = state['project']
-        self.obj = state['obj']
-        self._plugins = state['plugins']
+        object.__setattr__(self, '_project', state['project'])
+        object.__setattr__(self, 'obj', state['obj'])
+        object.__setattr__(self, '_plugins', state['plugins'])
 
     def __getstate__(self):
         s = {
@@ -37,6 +37,11 @@ class KnowledgeBase(object):
             'plugins': self._plugins,
         }
         return s
+
+    def __dir__(self):
+        x = super(KnowledgeBase, self).__dir__()
+        x.extend(default_plugins.keys())
+        return x
 
     #
     # Plugin accessor
@@ -50,6 +55,9 @@ class KnowledgeBase(object):
             return self.get_plugin(v)
         except KeyError:
             raise AttributeError(v)
+
+    def __setattr__(self, k, v):
+        self.register_plugin(k, v)
 
     #
     # Plugins
